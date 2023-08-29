@@ -45,7 +45,7 @@ public class CalculatingSumSeries {
 			System.out.println(numbers.creatTableValueSeriesOne(accaracy, step, numberIterations));
 		}
 		else if(x==2) {
-			int argument = (int) inputInt("Введит аргумент");
+			int argument = (int) inputInt("Введит аргумент: ");
 			System.out.println(numbers.creatTableValueSeriesTwo(accaracy, step, numberIterations, argument));
 		}
 		else if(x==3) {
@@ -106,13 +106,12 @@ class SeriesNumbers {
 		for (int x = 1; x < numberIterations; x++) {
 			double value = (double) 1 / x;
 			sum += value;
-			if (x == stepPrint * step) {
-				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x, value, sum));
-				stepPrint++;
-			}
 			if (Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
+			} else if (x - (stepPrint * step) == 1) {
+				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x, value, sum));
+				stepPrint++;
 			}
 		}
 		tableValue.append(sep);
@@ -130,21 +129,17 @@ class SeriesNumbers {
 		int stepPrint = 0;
 		double sum = 0;
 		double value = 1;
-		int factorial = 1;
 		for (int x = 0; x < numberIterations; x++) {
 			if (x > 0) {
-				factorial *= x;
 				value *= argument / x;
-//				argument *= argument;
-			} 
-			sum += value;
-			if (x == stepPrint * step) {
-				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
-				stepPrint++;
 			}
+			sum += value;
 			if (Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
+			} else if (x == (stepPrint * step)) {
+				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
+				stepPrint++;
 			}
 		}
 		tableValue.append(sep);
@@ -162,17 +157,16 @@ class SeriesNumbers {
 		double sum = 0;
 		double value = 1;
 		for (int x = 0; x < numberIterations; x++) {
-			if(x > 0) {
+			if (x > 0) {
 				value /= -2;
 			}
 			sum += value;
-			if(x == stepPrint * step) {
-			tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x+1, value, sum));
-			stepPrint++;
-			}
-			if(Math.abs(value) < accusracy) {
+			if (Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
+			} else if (x - (stepPrint * step) == 1) {
+				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
+				stepPrint++;
 			}
 		}
 		tableValue.append(sep);
