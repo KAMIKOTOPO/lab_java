@@ -1,12 +1,6 @@
 package lab_05;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.function.DoubleBinaryOperator;
-import java.util.function.DoubleUnaryOperator;
-import java.util.function.IntBinaryOperator;
-import java.util.function.IntUnaryOperator;
 
 public class CalculatingSumSeries {
 	public static void main(String[] args) {
@@ -109,57 +103,49 @@ class SeriesNumbers {
 		String msgSum = "";
 		int stepPrint = 0;
 		double sum = 0;
-		double previousValue = 1;
 		for (int x = 1; x < numberIterations; x++) {
 			double value = (double) 1 / x;
 			sum += value;
-			if (x - (stepPrint * step) == 1) {
+			if (x == stepPrint * step) {
 				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x, value, sum));
 				stepPrint++;
 			}
-			if (Math.abs(value - previousValue) < accusracy) {
+			if (Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
 			}
-			previousValue = value;
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
 		return tableValue.toString();
 	}
-	public String creatTableValueSeriesTwo(double accusracy, int step, int numberIterations, int argument) {
+	public String creatTableValueSeriesTwo(double accusracy, int step, int numberIterations, double argument) {
 		StringBuilder tableValue = new StringBuilder();
 		String sep = "+----------------------------+\n";
 		Scanner scanner = new Scanner(System.in);
 		tableValue.append(sep);
 		tableValue.append(String.format("|%10s|%8s|%8s|\n", "№ итерации", "t", "s"));
 		tableValue.append(sep);
-		int arg = argument;
-		int y = arg;
 		String msgSum = "";
 		int stepPrint = 0;
 		double sum = 0;
-		double previousValue = 1;
+		double value = 1;
 		int factorial = 1;
 		for (int x = 0; x < numberIterations; x++) {
-			double value;
-			if (x == 0) {
-				value = 1;
-			} else {
+			if (x > 0) {
 				factorial *= x;
-				value = (double) y / factorial;
-				y = y * arg;
-			}
+				value *= argument / x;
+//				argument *= argument;
+			} 
 			sum += value;
-			if (x - (stepPrint * step) == 0) {
+			if (x == stepPrint * step) {
 				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
 				stepPrint++;
 			}
-			if (Math.abs(value - previousValue) < accusracy) {
+			if (Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
 			}
-			previousValue = value;
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
@@ -174,28 +160,20 @@ class SeriesNumbers {
 		String msgSum = "";
 		int stepPrint = 0;
 		double sum = 0;
-		int y = 1;
-		double previousValue = 1;
-		int powD = 1;
+		double value = 1;
 		for (int x = 0; x < numberIterations; x++) {
-			double value;
-			if(x == 0) {
-				value = 1;
-			}else {
-				y *= 2;
-				powD *= -1;
-			 value = powD*(double)1/y;
+			if(x > 0) {
+				value /= -2;
 			}
 			sum += value;
-			if(x-(stepPrint*step)==0) {
+			if(x == stepPrint * step) {
 			tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x+1, value, sum));
 			stepPrint++;
 			}
-			if(Math.abs(value-previousValue) < accusracy) {
+			if(Math.abs(value) < accusracy) {
 				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
 				break;
 			}
-			previousValue = value;
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
