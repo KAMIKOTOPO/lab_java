@@ -14,9 +14,17 @@ public class CalculatingSumSeries {
 						1)Вывести таблицу промежуточных вычислений ряда 1
 						2)Вывести таблицу промежуточных вычислений ряда 2
 						3)Вывести таблицу промежуточных вычислений ряда 3
+						4)Закончить работу программы
 						""");
 				System.out.print("Выберите одну из предложенных операций: ");
-				tableMenu(series);
+				int x = scanner.nextInt();
+				if (x > 4 || x < 0) {
+					System.out.println("\nНет такой команды!!!");
+				}else if(x == 4) {
+					System.out.println("Программа закончила работу...");
+					return;
+				}
+				tableMenu(series, x);
 			} catch (java.util.InputMismatchException e) {
 				System.out.println("\nВы ввели некорректные данные");
 				scanner.nextLine();
@@ -24,13 +32,9 @@ public class CalculatingSumSeries {
 		}
 	}
 
-	public static void tableMenu(SeriesNumbers numbers) {
+	public static void tableMenu(SeriesNumbers numbers, int x) {
 		Scanner scanner = new Scanner(System.in);
-		int x = scanner.nextInt();
-		if (x > 3 || x < 0) {
-			System.out.println("\nНет такой команды!!!");
-		} else {
-			double accaracy = inputInt("Введите точность: ");
+			double accaracy = inputDouble("Введите точность: ");
 			int step = (int) checkNegativ("Введите шаг: ");
 			int numberIterations = (int) checkNegativ("Введите количество итераций: ");
 			switch (x) {
@@ -38,14 +42,13 @@ public class CalculatingSumSeries {
 				System.out.println(numbers.creatTableValueSeriesOne(accaracy, step, numberIterations));
 				break;
 			case 2:
-				double argument = inputInt("Введит аргумент: ");
+				double argument = inputDouble("Введит аргумент: ");
 				System.out.println(numbers.creatTableValueSeriesTwo(accaracy, step, numberIterations, argument));
 				break;
 			case 3:
 				System.out.println(numbers.creatTableValueSeriesThree(accaracy, step, numberIterations));
 				break;
 			}
-		}
 	}
 	public interface Checker {
 		boolean check(double val);
@@ -70,7 +73,7 @@ public class CalculatingSumSeries {
 		String essMsg = "Для этого значения не может использоваться отрицательное или равное нулю число";
 		return inputDouble(prompt, x -> x > 0, essMsg);
 	}
-	public static double inputInt(String prompt) {
+	public static double inputDouble(String prompt) {
 		return inputDouble(prompt, x -> true, "");
 	}
 }
@@ -88,13 +91,14 @@ class SeriesNumbers {
 		for (int x = 1; x <= numberIterations; x++) {
 			double value = (double) 1 / x;
 			sum += value;
-			if (Math.abs(value) < accusracy) {
-				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
-				break;
-			} else if (x - (stepPrint * step) == 1) {
+			if (x - (stepPrint * step) == 1) {
 				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x, value, sum));
 				stepPrint++;
 			}
+			if (Math.abs(value) < accusracy) {
+				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
+				break;
+			} 
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
@@ -111,18 +115,19 @@ class SeriesNumbers {
 		int stepPrint = 0;
 		double sum = 0;
 		double value = 1;
-		for (int x = 0; x <= numberIterations; x++) {
+		for (int x = 0; x < numberIterations; x++) {
 			if (x > 0) {
 				value *= argument / x;
 			}
 			sum += value;
-			if (Math.abs(value) < accusracy) {
-				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
-				break;
-			} else if (x == (stepPrint * step)) {
+			if (x == (stepPrint * step)) {
 				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
 				stepPrint++;
 			}
+			if (Math.abs(value) < accusracy) {
+				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
+				break;
+			} 
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
@@ -138,18 +143,19 @@ class SeriesNumbers {
 		int stepPrint = 0;
 		double sum = 0;
 		double value = 1;
-		for (int x = 0; x <= numberIterations; x++) {
+		for (int x = 0; x < numberIterations; x++) {
 			if (x > 0) {
 				value /= -2;
 			}
 			sum += value;
-			if (Math.abs(value) < accusracy) {
-				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
-				break;
-			} else if (x == (stepPrint * step)) {
+			if (x == (stepPrint * step)) {
 				tableValue.append(String.format("|%10d|%8.3f|%8.3f|\n", x + 1, value, sum));
 				stepPrint++;
 			}
+			if (Math.abs(value) < accusracy) {
+				msgSum = String.format("\nСумма бесконечного ряда - %.3f, вычислена за %d итерации", sum, x);
+				break;
+			} 
 		}
 		tableValue.append(sep);
 		tableValue.append(msgSum);
