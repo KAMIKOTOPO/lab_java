@@ -1,5 +1,11 @@
 package lab_06;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.Scanner;
 
 import lab_05.CalculatingSumSeries.Checker;
@@ -17,12 +23,13 @@ public class ArraysMetod {
 						4) Вывести список /
 						5) Добавить число /
 						6) Удалить число /
-						7) Найти число
-						8) Найти значение K-го экстремума в списке.
+						7) Найти число /
+						8) Найти значение K-го экстремума в списке. /
 						9) Найти наиболее длинную непрерывную возрастающую
 						последовательность отрицательных чисел, модуль которых является
 						простым числом.
-						10) Поменять местами последний чётный и минимальный положительный.
+						10) Поменять местами последний чётный и минимальный положительный. /
+						11) Завершить работу программы. /
 											""");
 				System.out.print("Выберите одну из предложенных операций: ");
 				int x = scanner.nextInt();
@@ -31,6 +38,10 @@ public class ArraysMetod {
 					int sizeArray = (int)inputDouble("Введите размер массива: ");
 					arraysList.creatRandomArrays(sizeArray);
 					break;
+				case 2:
+					arraysList.saveArraysInFile();
+					System.out.println("Массив сохранен в файл");
+					break;
 				case 4:
 					System.out.println(arraysList.toString());
 					break;
@@ -38,8 +49,21 @@ public class ArraysMetod {
 					menuAdd(arraysList);
 					break;
 				case 6:
-					int index = (int) inputDouble("Введите индекс числа, которое будет удалено: ");
+					int index = (int) checkIndex("Введите индекс числа, которое будет удалено: ", arraysList);
 					arraysList.remove(index);
+					break;
+				case 7:
+					double value = inputDouble("Введите значение индекс которого вы хотите найти: ");
+					System.out.println(arraysList.indexOf(value));
+					break;
+				case 8:
+					System.out.println(arraysList.extremum());
+					break;
+				case 11: 
+					System.out.println("Программа завершила работу...");
+					return;
+				case 10:
+					arraysList.changeEvenLastAndMinimumPositivNumbers();
 					break;
 				default:
 					System.out.println("\nТакой команды нет\n");
@@ -65,7 +89,7 @@ public class ArraysMetod {
 				arraysList.add(number1);
 				return;
 			case 2:
-				int index = (int) inputDouble("Введите номер индекс по которому хотите добавить число: ");
+				int index = (int) checkIndex("Введите номер индекс по которому хотите добавить число: ", arraysList);
 				double number2 = inputDouble("Введите число которое хотите добавить: ");
 				arraysList.insert(index, number2);
 				return;
@@ -104,6 +128,10 @@ public class ArraysMetod {
 	public static double inputDouble(String prompt) {
 		return inputDouble(prompt, x -> true, "");
 	}
+	public static double checkIndex(String prompt, ArraysList arraysList) {
+		String errMsg = "Нет такого индекса";
+		return inputDouble(prompt, x -> x > 0 && x < arraysList.size(), errMsg);
+	}
 }
 
 class ArraysList {
@@ -118,19 +146,19 @@ class ArraysList {
 	public double getArray(int i) {
 		return array[i];
 	}
-
+	public double[] creatNewArrays(int lengthArray) {
+		double[] newArray = new double[lengthArray * 2];
+		for (int i = 0; i < lengthArray; i++) {
+			newArray[i] = array[i];
+		}
+		return newArray;
+	}
 	public void add(double number) {
 		int lengthArray = array.length;
 		if (realLength != lengthArray) {
-			for (int i = 0; i < lengthArray; i++) {
-				array[i] = array[i];
-			}
 			array[realLength] = number;
 		} else {
-			double[] newArray = new double[lengthArray * 2];
-			for (int i = 0; i < lengthArray; i++) {
-				newArray[i] = array[i];
-			}
+			double[] newArray = creatNewArrays(lengthArray);
 			newArray[realLength] = number;
 			array = newArray;
 		}
@@ -139,66 +167,139 @@ class ArraysList {
 
 	public void insert(int index, double number) {
 		int lengthArray = array.length;
-//		if (realLength != lengthArray) {
-//			for (int i = lengthArray - 1; i >= 0; i--) {
-//				array[i] = array[i];
-//				if(i == index) {
-//					array[i] = number;
-//				}
-//			}
-//			array[index] = number;
-//		} else {
-		double[] newArray = new double[lengthArray * 2];
-		for (int i = lengthArray - 1; i >= 0; i--) {
-			newArray[i] = array[i];
+		for (int i = 0; i < lengthArray; i++) {
 			if (i == index) {
-				newArray[i] = number;
+				array[i] = number;
 			}
 		}
-		array = newArray;
 	}
 
 	public void remove(int index) {
 		int lengthArray = array.length;
-		int lengthNewArray = lengthArray - 1;
-		double[] newArray = new double[lengthNewArray];
-//		for (int i = 0; i < lengthArray; i++) {
-//			if(i == index) {
-//				
-//				continue;
-//			}else {
-//			newArray[i] = array[i];
-//			}
-//		}
-		int i = 0;
-		while (i > lengthArray) {
-			if(i!=index){
-				newArray[i] = array[i];
-				i++;
-			}else {
-				continue;
-			}
+		for (int i = index; i < lengthArray-1; i++) {
+			double step = array[i];
+			array[i] = array[i+1];
+			array[i+1] = step;
 		}
-		array = newArray;
-		realLength = lengthNewArray;
+		realLength = lengthArray-1;
 	}
 
-	public void creatRandomArrays(int sizeArrays) {
-		double[] newArray = new double[sizeArrays];
-		for (int i = 0; i < sizeArrays; i++) {
+	public void creatRandomArrays(int arraysSize) {
+		double[] newArray = new double[arraysSize];
+		for (int i = 0; i < arraysSize; i++) {
 			newArray[i] = Math.round(Math.random() * 10);
 		}
 		array = newArray;
-		realLength = sizeArrays;
+		realLength = arraysSize;
+	}
+	
+	public String indexOf(double value) {
+		int index = -1;
+		StringBuilder findIndex = new StringBuilder();
+		for (int i = 0; i < realLength; i++) {
+			if(array[i] == value) {
+				index = i;
+				break;
+			}
+		}
+		if(index == -1) {
+			findIndex.append("Такого значения нет в массиве");
+		}else {
+			findIndex.append(String.format("Первое вхождение значение произошло под индексом - %d", index));
+		}
+		return findIndex.toString();
+	}
+	
+	public void changeEvenLastAndMinimumPositivNumbers() {
+		int lenghtArray = array.length;
+		int indexEvenLastNumber = -1;
+		double minPositiv = Integer.MAX_VALUE;
+		int indexMinPositiv = -1;
+		for (int i = 0; i < lenghtArray; i++) {
+			if(array[i]%2==0) {
+				indexEvenLastNumber = i;
+			}
+			if(array[i]<minPositiv && array[i]>0) {
+				minPositiv = array[i];
+				indexMinPositiv = i;
+			}
+		}
+		if(indexEvenLastNumber == -1) {
+			System.out.println("Нет четных чисел в массиве");
+		}
+		else if(indexMinPositiv == -1) {
+			System.out.println("Нет положительных чисел в массиве");
+		}else {
+			double[] newArray = creatNewArrays(lenghtArray);
+			double step = newArray[indexEvenLastNumber];
+			newArray[indexEvenLastNumber] = newArray[indexMinPositiv];
+			newArray[indexMinPositiv] = step;
+			array = newArray;
+			System.out.println("Значения поменялись местами");
+		}
+	}
+	
+	public String extremum() {
+		double valueMinExtremum  = 0;
+		int indexMinExtremum = -1;
+		double valueMaxExtremum  = 0;
+		int indexMaxExtremum = -1;
+		StringBuilder strExtremum = new StringBuilder();
+		for (int i = 1; i < array.length - 1; i++) {
+			if (array[i] > array[i - 1] && array[i] > array[i + 1]) {
+				valueMaxExtremum = array[i];
+				indexMaxExtremum = i;
+			} else if (array[i] < array[i - 1] && array[i] < array[i + 1]) {
+				valueMinExtremum = array[i];
+				indexMinExtremum = i;
+			}
+		}
+		if (indexMaxExtremum != -1 && indexMinExtremum != -1) {
+			strExtremum.append(
+					String.format("Максимальный экстремум - %f, индекс - %d. Минимальный экстремум - %f, индекс - %d.",
+							valueMaxExtremum, indexMaxExtremum, valueMinExtremum, indexMinExtremum));
+		} else {
+			if (indexMaxExtremum == -1) {
+				strExtremum.append("Максимального экстремума нет");
+			}else {
+				strExtremum.append(String.format("Максимальный экстремум - %f, индекс - %d.", valueMaxExtremum, indexMaxExtremum));
+			}
+			if (indexMinExtremum == -1) {
+				strExtremum.append("Минимального экстремума нет");
+			}else {
+				strExtremum.append(String.format("Минимальный экстремум - %f, индекс - %d.", valueMinExtremum, indexMinExtremum));
+			}
+		}
+		return strExtremum.toString();
+	}
+	
+	public void saveArraysInFile() {
+		try {
+			   File file = new File("arraysFile.txt");
+			   PrintWriter pw = new PrintWriter(file);
+			   for (int i = 0; i < array.length; i++) {
+				   if(i == realLength - 1) {
+				   pw.print(array[i]);
+				   }else {
+					   pw.print(array[i]);
+					   pw.print(", ");
+				   }
+			   }
+			   pw.close();
+
+			} catch (IOException e) {
+			   System.out.println("Возникла ошибка во время записи, проверьте данные.");
+			}
 	}
 	
 	public String toString() {
 		StringBuilder prnArray = new StringBuilder("[");
 		for (int i = 0; i < realLength; i++) {
 			if (i == realLength - 1) {
-				prnArray.append(array[i] + "");
+				prnArray.append(array[i]);
 			} else {
-				prnArray.append(array[i] + ", ");
+				prnArray.append(array[i]);
+				prnArray.append(", ");
 			}
 		}
 		prnArray.append("]");
