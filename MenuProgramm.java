@@ -9,7 +9,7 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 public class MenuProgramm {
-	public static void main(String[] args) throws IndexArrayException {
+	public static void main(String[] args) throws IndexOutOfBoundsException {
 		Scanner scanner = new Scanner(System.in);
 		MyArrayList myArraysList = new MyArrayList();
 		while (true) {
@@ -27,8 +27,7 @@ public class MenuProgramm {
 						последовательность отрицательных чисел, модуль которых является
 						простым числом.
 						10) Поменять местами последний чётный и минимальный положительный. /
-						11) Завершить работу программы. /
-											""");
+						11) Завершить работу программы. /""");
 				System.out.print("Выберите одну из предложенных операций: ");
 				int x = scanner.nextInt();
 				switch (x) {
@@ -62,15 +61,17 @@ public class MenuProgramm {
 					}
 					break;
 				case 8:
-					int indexExtremum = findIndexExtremum(myArraysList);
-					System.out.printf("Значение K-го экстремума в списке: %.3f\n", indexExtremum);
+					int indexExtremum = findIndexExtremum(myArraysList, (int) inputDouble("введите к: "));
+					System.out.printf("Значение K-го экстремума в списке: %3f\n", indexExtremum);
 					break;
+				case 9:
+					sequence(myArraysList.getArray());
+				case 10:
+					swapLastEvenAndMinimumPositiveNumbers(myArraysList);
+					break;	
 				case 11:
 					System.out.println("Программа завершила работу...");
 					return;
-				case 10:
-					swapLastEvenAndMinimumPositiveNumbers(myArraysList);
-					break;
 				default:
 					System.out.println("\nТакой команды нет\n");
 					break;
@@ -81,7 +82,7 @@ public class MenuProgramm {
 		}
 	}
 
-	public static void menuAdd(MyArrayList myArraysList) throws IndexArrayException {
+	public static void menuAdd(MyArrayList myArraysList) throws IndexOutOfBoundsException {
 		while (true) {
 			Scanner scanner = new Scanner(System.in);
 			System.out.println("""
@@ -89,64 +90,60 @@ public class MenuProgramm {
 					2)Добавить число по заданому индексу
 					""");
 			int x = (int) inputDouble("Выберите одну из предложенных операций: ");
-			switch (x) {
-			case 1:
+			if (x == 1) {
 				double number1 = inputDouble("Введите число которое хотите добавить в конец списка: ");
 				myArraysList.add(number1);
 				return;
-			case 2:
+			} else if (x == 2) {
 				if (myArraysList.size() == 0) {
 					System.out.println("Массив пока что не создан");
-					return;
 				} else {
 					int index = (int) checkIndex("Введите номер индекс по которому хотите добавить число: ",
 							myArraysList);
 					if (index < 0) {
-						throw new IndexArrayException("Индекс не может быть отрицательным");
+						throw new IndexOutOfBoundsException("Индекс не может быть отрицательным");
 					} else {
 						double number2 = inputDouble("Введите число которое хотите добавить: ");
 						myArraysList.insert(index, number2);
-						return;
 					}
 				}
-			default:
+			return;
+			} else {
 				System.out.println("\nТакой команды нет\n");
 			}
 		}
 	}
 
-	public static void creatRandomArray(int arraySize, MyArrayList myArraysList) throws IndexArrayException {
+	public static void creatRandomArray(int arraySize, MyArrayList myArraysList) throws IndexOutOfBoundsException {
 		if (arraySize <= 0) {
-			throw new IndexArrayException("Индекс не может быть отрицательным");
+			throw new IndexOutOfBoundsException("Индекс не может быть отрицательным");
 		} else {
 			double[] newArray = new double[arraySize];
 			for (int i = 0; i < arraySize; i++) {
-				newArray[i] = Math.round(Math.random() * 10);
+				newArray[i] = Math.round(Math.random() * 10) * (Math.pow((-1), Math.round(Math.random() * 10)));
 			}
 			myArraysList.setArray(newArray);
-			myArraysList.setRealLength(newArray.length);
+			myArraysList.setSize(arraySize);
 		}
 	}
 
-	public static int findIndexExtremum(MyArrayList myArrayList) {
-		int indexExtremum = -1;
-		for (int i = 1; i < myArrayList.getRealLength() - 1; i++) {
-			if ((myArrayList.getArray()[i] > myArrayList.getArray()[i - 1]
-					&& myArrayList.getArray()[i] > myArrayList.getArray()[i + 1])
-					|| (myArrayList.getArray()[i] < myArrayList.getArray()[i - 1]
-							&& myArrayList.getArray()[i] < myArrayList.getArray()[i + 1])) {
-				indexExtremum = i;
+	public static int findIndexExtremum(MyArrayList myArrayList, int k) {
+		for (int i = 1; i < myArrayList.size() - 1; i++) {
+			if ((myArrayList.get(i) > myArrayList.get(i - 1)
+					&& myArrayList.get(i) > myArrayList.get(i + 1))
+					|| (myArrayList.get(i)< myArrayList.get(i - 1)
+							&& myArrayList.get(i) < myArrayList.get(i + 1)) && (--k == 0)) {
+				return i;
 			}
 		}
-		return indexExtremum;
+		return -1;
 	}
 
 	public static void saveArrayInFile(MyArrayList myArrayList) {
 		try (FileWriter fw = new FileWriter("./arraysFile.txt", false)) {
-			BufferedWriter bf = new BufferedWriter(fw);
-			PrintWriter out = new PrintWriter(bf);
-			for (int i = 0; i < myArrayList.getRealLength(); i++) {
-				out.print(String.format("%.1f\n", myArrayList.getArray()[i]));
+			PrintWriter out = new PrintWriter(new BufferedWriter(fw));
+			for (int i = 0; i < myArrayList.size(); i++) {
+				out.print(String.format("%.1f\n", myArrayList.get(i)));
 			}
 			out.flush();
 			out.close();
@@ -161,27 +158,28 @@ public class MenuProgramm {
 			String line;
 			int count = 0;
 			while ((line = br.readLine()) != null) {
-				myArrayList.add(Double.parseDouble(line.replaceAll(",", ".")));
+				myArrayList.add(Double.parseDouble(line.replace(",", ".")));
 				count++;
 			}
-			myArrayList.setRealLength(count);
-		} catch (IOException e) {
-			System.out.println("Возникла ошибка во время записи, проверьте данные.");
+			myArrayList.setSize(count);
 		} catch (java.lang.NumberFormatException e) {
+			System.out.println("Возникла ошибка во время записи, проверьте данные.");
+		}catch (IOException e) {
 			System.out.println("Возникла ошибка во время записи, проверьте данные.");
 		}
 	}
 
 	public static void swapLastEvenAndMinimumPositiveNumbers(MyArrayList myArrayList) {
 		int indexEvenLastNumber = -1;
-		double minPositiv = Integer.MAX_VALUE;
+		double minPositive = Integer.MAX_VALUE;
 		int indexMinPositiv = -1;
-		for (int i = 0; i < myArrayList.getRealLength(); i++) {
-			if (myArrayList.getArray()[i] % 2 == 0) {
+		for (int i = 0; i < myArrayList.size(); i++) {
+			double num = myArrayList.get(i);
+			if (num % 2 == 0) {
 				indexEvenLastNumber = i;
 			}
-			if (myArrayList.getArray()[i] < minPositiv && myArrayList.getArray()[i] > 0) {
-				minPositiv = myArrayList.getArray()[i];
+			if (num < minPositive && num > 0) {
+				minPositive = myArrayList.get(i);
 				indexMinPositiv = i;
 			}
 		}
@@ -190,20 +188,45 @@ public class MenuProgramm {
 		} else if (indexMinPositiv == -1) {
 			System.out.println("Нет положительных чисел в массиве");
 		} else {
-			double step = myArrayList.getArray()[indexEvenLastNumber];
-			myArrayList.getArray()[indexEvenLastNumber] = myArrayList.getArray()[indexMinPositiv];
-			myArrayList.getArray()[indexMinPositiv] = step;
+			double temp = myArrayList.get(indexEvenLastNumber);
+            myArrayList.set(indexEvenLastNumber,  myArrayList.get(indexMinPositiv));
+            myArrayList.set(indexMinPositiv, temp);
 			System.out.println("Значения поменялись местами");
 		}
 	}
 
-
-	public void findLongSeries(MyArrayList myArrayList) {
-		int longSeries = 0;
-		double[] realSeries = 
-		for (int i = 0; i < myArrayList.getRealLength(); i++) {
-			
+	public static boolean isPrime(double num) {
+		if(Math.abs(num) < 2) return false;
+        for(int i = 2; i < Math.abs(num) / 2; i++) {
+            if(Math.abs(num) % i == 0) {
+                return false;
+            }
+        }
+        return true;
+	}
+	
+	public static void sequence(double[] arr) {
+		int maxLen = 0;
+		int maxIndex = -1;
+		int len = 0;
+		for (int i = 1; i < arr.length; i++) {
+			if(isPrime(arr[i]) && arr[i]<0) {
+				len++;
+				if(len>1) {
+					if(arr[i]<arr[i-1]) {
+						len = 0;
+					}
+				}
+			}else {
+				if(len>maxLen) {
+					maxLen = len;
+					maxIndex = i-len;
+				}
+				len = 0;
+			}
 		}
+		System.out.println("Начальный индекс последовательности: " + maxIndex);
+		System.out.println("Длинна последовательности: " + maxLen);
 	}
 	
 	public interface Checker {
